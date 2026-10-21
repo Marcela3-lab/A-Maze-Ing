@@ -1,5 +1,4 @@
 __pycache__/
 *.pyc
 .mypy_cache/
-test*.py
 .vscode

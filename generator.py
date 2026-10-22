@@ -7,10 +7,24 @@ class Mazegenerator:
     SOUTH: int = 4
     WEST: int = 8
 
-    #x = col, y = row ==> use (row, col)
-    def __init__(self, width: int, height: int, seed: int | None = None) -> None:
-        self.width: int = width
-        self.height: int = height
+    #width = col, height = row ==> use (row, col)
+    def __init__(
+            self, width: int, height: int,
+            #entry: tuple = (0,0), exit: tuple = (0,0),
+            perfect: bool = True,
+            seed: int | None = None,
+        ) -> None:
+        if width <= 0:
+            raise ValueError("width must be >= 0")
+        else:
+            self.width: int = width
+        if height <= 0:
+            raise ValueError("height must be .= 0")
+        else:
+            self.height: int = height
+        #self.entry: tuple = entry // condicoes: entry!= exit, e dentro da grelha
+        #self.exit: tuple = exit
+        self.perfect: bool = perfect
         self.grid: list[list[int]] = []
         self.visited: set[tuple[int, int]] = set()
         self.stack: list[tuple[int, int]] = []
@@ -92,15 +106,36 @@ class Mazegenerator:
             self.grid[current[0]][current[1]] &= ~self.NORTH
 
 
-    def generate_dfs(self) -> None:
+    def fortytwo(self) -> list[tuple]:
+        '''Finds center of grid and selects cells for the 42 design,
+        by marking them as visited. Returns a list of the cells' coordinates
+        (tuples) to help the design in the terminal'''
+        fortytwo_cells = []
+        #validate enough space in grid for design
+        if self.width >= 9 or self.height >= 7:
+            #find center. width = col, height = row ==> use (row, col)
+            c_row = int(self.height/2)
+            c_col = int(self.width/2)
+
+            #add 42 cells(tuples) into visited list & 42 list for terminal
+            fortytwo_cells = [
+                (c_row-2, c_col-3), (c_row-1, c_col-3), (c_row-1, c_col-2),
+                (c_row-1, c_col-1), (c_row, c_col-1), (c_row+1, c_col-1),
+                (c_row+2, c_col-1), (c_row-2, c_col+1), (c_row-2, c_col+2),
+                (c_row-2, c_col+3), (c_row-1, c_col+3), (c_row, c_col+1),
+                (c_row, c_col+2), (c_row, c_col+3), (c_row+1, c_col+1),
+                (c_row+2, c_col+1), (c_row+2, c_col+2), (c_row+2, c_col+3)
+            ]
+            for cell in fortytwo_cells:
+                self.visited.add(cell)
+        return fortytwo_cells
+
+
+    def dfs(self) -> None:
         '''generates a perfect maze using Depth-First Search (DFS) algorithm,
         using an iterative implementation (with stack).
         Modifies the grid[row][col].'''
 
-        self.setupgrid()
-        if len(self.grid) == 0:
-            pass #RAISE EXCEPTION: grid not created or width/height not defined
-        
         #x = col, y = row, (row, col)
         #STEP 1: Choose the initial cell, mark it as visited and push it to the stack
         current = (0, 0)
@@ -131,24 +166,41 @@ class Mazegenerator:
                 self.stack.append(next_cell)
 
 
+    def generate(self) -> None: #FIQUEI AQUI: DEBUG: perceber porque grid = [] <=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=AQUI!!!
+        self.setupgrid()
+        if len(self.grid) == 0:
+            raise ValueError("Grid setup Error: Invalid data")
+        
+        self.fortytwo()
+        self.dfs()
+        
 
 if __name__ == "__main__":
 
-    width = 5 #num de elementos por lista
-    height = 5 #num de listas
+    width = 100 #num de elementos por lista
+    height = 100 #num de listas
 
-    testgrid = Mazegenerator(width, height)
-    # testgrid.setupgrid()
+    testmaze = Mazegenerator(width, height)
+    # testmaze.setupgrid()
     
-    # print(f"GRID BEFORE: {testgrid.grid}")
+    # print(f"GRID BEFORE: {testmaze.grid}")
     # print("---test check neighbors function ---")
-    # next_cell = testgrid.check_neighbors(0, 0)
+    # next_cell = testmaze.check_neighbors(0, 0)
     # print(f"next cell: {next_cell}")
 
-    print("---test DFS function ---")
-    testgrid.generate_dfs()
-    print(f"len visited: {len(testgrid.visited)}")
-    print(f"GRID AFTER: {testgrid.grid}")
+    # print("---test DFS function ---")
+    # testmaze.dfs()
+    # print(f"len visited: {len(testmaze.visited)}")
+    # print(f"GRID AFTER: {testmaze.grid}")
+
+    # print(" --- Test 42 function --- ")
+    # testlist = testmaze.fortytwo()
+    # print(f"\ntestlist: {testlist}")
+    try:
+        print(testmaze.grid)
+    except Exception as e:
+        print(e)
+
 
 
 

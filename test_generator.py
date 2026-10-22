@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 from generator import Mazegenerator
 
-def test_maze(w, h):
-    testgrid = Mazegenerator(w, h)
+def test_maze(w, h, seed=None):
+    testgrid = Mazegenerator(w, h, seed)
     testgrid.generate_dfs()
 
     #all cells were visited
@@ -45,6 +45,7 @@ def test_maze(w, h):
 
     assert n == w*h - 1, f"there are {n} passages in a maze with {w*h} cells"
 
+    return testgrid.grid
 
 if __name__ == "__main__":
 
@@ -60,3 +61,11 @@ if __name__ == "__main__":
         print(f" ---- TEST W = {w}, H = {h} ---- ")
         test_maze(w, h)
         print("[OK]")
+    
+    print(f"\n ---- SEED TEST ---- ")
+    seeds = [10, 22]
+    for i in seeds:
+        print(f"\nSEED = {i}")
+        grids = test_maze(w=5, h=5, seed=i)
+        for row in grids:
+            print(row)

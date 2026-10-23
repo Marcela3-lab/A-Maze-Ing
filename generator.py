@@ -210,6 +210,22 @@ class Mazegenerator:
             return None
 
 
+    def is_block_open(self, corner: tuple[int, int]) -> bool:
+        row = corner[0]
+        col = corner[1]  
+        
+        for r in range(3):
+            if row + r <= self.height - 1:
+                for c in range(3):
+                    if (col + c) <= self.width - 1:
+                        cell = self.grid[row+r][col+c]
+                        if cell & self.EAST != 0 and c != 2:
+                            return False
+                        if cell & self.SOUTH != 0 and r != 2:
+                            return False
+        return True                        
+            
+
     #width = col, height = row ==> use (row, col)
     def verify_open_areas(self, current: tuple[int, int]) -> bool:
         '''For the current cell, identifies all 9 possible combinations of
@@ -222,11 +238,11 @@ class Mazegenerator:
         for r in range(3):
             if (row - r >= 0):
                 for c in range(3):
-                    if(col - c > 0) # ==============================================AQUI!: fazer is_block_open(corner)
+                    if(col - c >= 0):
                         corner = (row - r, col - c)
-                        is_block_open(corner)
-        #return???
-
+                        if self.is_block_open(corner):
+                            return True
+        return False
 
 
     def brading_maze(self) -> None:
@@ -237,7 +253,8 @@ class Mazegenerator:
                 if self.grid[row][col] in one_wall_open:
                     chosen_braid = self.get_braid_neighbor(row, col)
                     self.remove_walls(current, chosen_braid)
-                    self.verify_open_areas(current, chosen_braid)
+                    if self.verify_open_areas(current):
+                        self.add_walls_back(current, chosen_braid) #====================> AQUI! fazer add_walls_back
 
 
 

@@ -6,6 +6,8 @@ class Mazegenerator:
     EAST: int = 2
     SOUTH: int = 4
     WEST: int = 8
+    DEADENDS = [7, 11, 13, 14]
+
 
     #width = col, height = row ==> use (row, col)
     def __init__(
@@ -170,10 +172,10 @@ class Mazegenerator:
                 self.stack.append(next_cell)
 
 
-    def get_braid_neighbor(self, row: int, col: int) -> tuple[int, int] | None:
+    def get_braid_neighbors(self, row: int, col: int) -> list[tuple[int, int]] | None:
         '''checks neighbors of current (row, col) cell. 
-        Adds to a list if not in 42 design. Returns a random cell as tuple
-        or None if there is none. Used for PERFECT=false.'''
+        Adds to a list if not in 42 design. Returns a list of tuples.
+        Used for PERFECT=false.'''
 
         braids = []
 
@@ -203,11 +205,7 @@ class Mazegenerator:
         if left is not None and left not in self.fortytwo_cells:
             braids.append(left)
         
-        if len(braids) > 0:
-            r = self.randgen.choice(braids)
-            return r
-        else:
-            return None
+            return braids
 
 
     def is_block_open(self, corner: tuple[int, int]) -> bool:
@@ -243,19 +241,40 @@ class Mazegenerator:
                         if self.is_block_open(corner):
                             return True
         return False
+    
+    
+    def is_deadend(self, cell: tuple[int, int]) -> bool:
+        row = cell[0]
+        col = cell[1]
+        if self.grid[row][col] in self.DEADENDS:
+            return True
+        else:
+            return False
 
 
-    def brading_maze(self) -> None:
-        one_wall_open = [7, 11, 13, 14]
+    def braiding_maze(self) -> None:
+
         for row in range(len(self.grid)):
             for col in range(len(self.grid[row])):
                 current = (row, col)
-                if self.grid[row][col] in one_wall_open:
-                    chosen_braid = self.get_braid_neighbor(row, col)
-                    self.remove_walls(current, chosen_braid)
-                    if self.verify_open_areas(current):
-                        self.add_walls_back(current, chosen_braid) #====================> AQUI! fazer add_walls_back
+                if self.is_deadend(current):
+                    braid_nghb = self.get_braid_nghbors(row, col)
+                    self.randgen.shuffle(braid_nghb) #shuffle da lista
+                    deads = []
+                    no_deads = []
+                    for neighbor in braid_nghb:
+                        if self.is_deadend(neighbor):
+                            deads.append(neighbor)
+                        else:
+                            no_deads.append(neighbor)
+                    final_list = deads + no_deads
 
+                    for candidate in final_list:
+                        self.remove_walls(current, candidate)
+                        if self.verify_open_areas(current):
+                            self.add_walls_back(current, candidate)
+                        else:
+                            break
 
 
     def generate(self) -> None:

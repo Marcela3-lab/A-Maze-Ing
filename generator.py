@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 import random
 
 class Mazegenerator:
@@ -6,7 +5,7 @@ class Mazegenerator:
     EAST: int = 2
     SOUTH: int = 4
     WEST: int = 8
-    DEADENDS = [7, 11, 13, 14]
+    DEADENDS = {7, 11, 13, 14}
 
 
     #width = col, height = row ==> use (row, col)
@@ -14,7 +13,7 @@ class Mazegenerator:
             self, width: int, height: int,
             #entry: tuple = (0,0), exit: tuple = (0,0),
             perfect: bool = True,
-            seed: int | None = None,
+            seed = None,
         ) -> None:
         if width <= 0:
             raise ValueError("width must be >= 0")
@@ -153,8 +152,7 @@ class Mazegenerator:
 
             # STEP 2.a: Pop a cell from the stack and make it a current cell
             current = self.stack.pop()
-            row = current[0]
-            col = current[1]
+            row, col = current
 
             # STEP 2.b: If the current cell has any neighbours which have not been visited
             #pick random neighbor as next cell
@@ -209,18 +207,16 @@ class Mazegenerator:
 
 
     def is_block_open(self, corner: tuple[int, int]) -> bool:
-        row = corner[0]
-        col = corner[1]  
+        '''checks if there is a 3x3 block open for the upper left corner'''
+        row, col = corner
         
         for r in range(3):
-            if row + r <= self.height - 1:
-                for c in range(3):
-                    if (col + c) <= self.width - 1:
-                        cell = self.grid[row+r][col+c]
-                        if cell & self.EAST != 0 and c != 2:
-                            return False
-                        if cell & self.SOUTH != 0 and r != 2:
-                            return False
+            for c in range(3):
+                cell = self.grid[row+r][col+c]
+                if cell & self.EAST != 0 and c != 2:
+                    return False
+                if cell & self.SOUTH != 0 and r != 2:
+                    return False
         return True                        
             
 
@@ -230,13 +226,11 @@ class Mazegenerator:
         3x3 blocks excluding edge cases. Verifies if any block is open by
         calling another function and returns True if there is an open area.'''
 
-        row = current[0]
-        col = current[1]
-
+        row, col = current
         for r in range(3):
-            if (row - r >= 0):
+            if row - r >= 0 and row - r + 2 <= self.height - 1:
                 for c in range(3):
-                    if(col - c >= 0):
+                    if col - c >= 0 and col - c + 2 <= self.width - 1:
                         corner = (row - r, col - c)
                         if self.is_block_open(corner):
                             return True
@@ -244,12 +238,35 @@ class Mazegenerator:
     
     
     def is_deadend(self, cell: tuple[int, int]) -> bool:
-        row = cell[0]
-        col = cell[1]
-        if self.grid[row][col] in self.DEADENDS:
-            return True
-        else:
-            return False
+        row, col = cell    # == row = cell[0], col = cell[1]
+        return self.grid[row][col] in self.DEADENDS
+
+
+
+    def add_walls_back(
+        self, current: tuple[int, int], candidate: tuple[int, int]
+        ) -> None:
+        '''adds wall that has been removed in the brading process 
+        between current & candidate neighbor cells.
+        It's called if after opening wall for PERFECT=false,
+        a 3x3 open block is created.'''
+
+        col = candidate[1] - current[1]
+        if col == 1:
+            self.grid[candidate[0]][candidate[1]] |= self.WEST
+            self.grid[current[0]][current[1]] |= self.EAST
+        elif col == -1:
+            self.grid[candidate[0]][candidate[1]] |= self.EAST
+            self.grid[current[0]][current[1]] |= self.WEST
+        
+        row = candidate[0] - current[0]
+        if row == 1:
+            self.grid[candidate[0]][candidate[1]] |= self.NORTH
+            self.grid[current[0]][current[1]] |= self.SOUTH
+        elif row == -1:
+            self.grid[candidate[0]][candidate[1]] |= self.SOUTH
+            self.grid[current[0]][current[1]] |= self.NORTH
+
 
 
     def braiding_maze(self) -> None:
@@ -267,7 +284,7 @@ class Mazegenerator:
                             deads.append(neighbor)
                         else:
                             no_deads.append(neighbor)
-                    final_list = deads + no_deads
+                    final_list = deads + no_deads #sort list so deadends are first
 
                     for candidate in final_list:
                         self.remove_walls(current, candidate)

@@ -52,7 +52,7 @@ if __name__ == "__main__":
     #w = x = col, h = y = row ==> use (row, col)
 
     sizes= [(10,15), (4,4), (1,1), (1,7), (7,1), (2,2), (3,7), (7,3), (50, 50), (100, 100)]
-
+    
     print(f">>>>Warning: DFS test for maze WITHOUT 42 design.\n")
 
     for combo in sizes:

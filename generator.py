@@ -117,7 +117,7 @@ class Mazegenerator:
         (tuples) to help the design in the terminal'''
 
         #validate enough space in grid for design
-        if self.width >= 9 or self.height >= 7:
+        if self.width >= 9 and self.height >= 7:
             #find center. width = col, height = row ==> use (row, col)
             c_row = int(self.height/2)
             c_col = int(self.width/2)
@@ -203,7 +203,7 @@ class Mazegenerator:
         if left is not None and left not in self.fortytwo_cells:
             braids.append(left)
         
-            return braids
+        return braids
 
 
     def is_block_open(self, corner: tuple[int, int]) -> bool:
@@ -275,7 +275,10 @@ class Mazegenerator:
             for col in range(len(self.grid[row])):
                 current = (row, col)
                 if self.is_deadend(current):
-                    braid_nghb = self.get_braid_nghbors(row, col)
+                    braid_nghb = self.get_braid_neighbors(row, col)
+                    if current in [(6,0), (2,2)]:
+                        print(self.grid)
+                        print(f"DEBUG 1: braid neighbors for {current}: {braid_nghb}\n")
                     self.randgen.shuffle(braid_nghb) #shuffle da lista
                     deads = []
                     no_deads = []
@@ -288,6 +291,9 @@ class Mazegenerator:
 
                     for candidate in final_list:
                         self.remove_walls(current, candidate)
+                        if current in [(6,0), (2,2)]:
+                            print(self.grid)
+                            print(f"DEBUG 2: {current} open areas: {self.verify_open_areas(current)}\n")
                         if self.verify_open_areas(current):
                             self.add_walls_back(current, candidate)
                         else:
@@ -304,34 +310,10 @@ class Mazegenerator:
         self.fortytwo()
         self.dfs()
         
-
-if __name__ == "__main__":
-
-    width = 10 #num de elementos por lista
-    height = 10 #num de listas
-
-    testmaze = Mazegenerator(width, height)
-    # testmaze.setupgrid()
+        if self.perfect == False:
+            self.braiding_maze()
+        
     
-    # print(f"GRID BEFORE: {testmaze.grid}")
-    # print("---test check neighbors function ---")
-    # next_cell = testmaze.unvisited_neighbor(0, 0)
-    # print(f"next cell: {next_cell}")
-
-    # print("---test DFS function ---")
-    # testmaze.dfs()
-    # print(f"len visited: {len(testmaze.visited)}")
-    # print(f"GRID AFTER: {testmaze.grid}")
-
-    # print(" --- Test 42 function --- ")
-    # testlist = testmaze.fortytwo()
-    # print(f"\ntestlist: {testlist}")
-
-    testmaze.generate()
-    print("Result! grid:")
-    for lines in testmaze.grid:
-        form = list(map("{:02d}".format, lines))
-        print(form)
 
 
 

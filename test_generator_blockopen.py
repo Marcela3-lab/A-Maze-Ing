@@ -88,3 +88,29 @@ for cells in fours:
         print(f"{cells} in fours: [OK]")
     else:
         print(f"{cells} in fours: [KO]")
+
+print(f"---- \n\nTesting Add walls Back ----\n")
+maze2 = Mazegenerator(5,5)
+maze2.setupgrid()
+before = [lines.copy() for lines in maze2.grid]
+
+tests = [
+    [(0,0), (0,1)],
+    [(0,0), (1,0)],
+    [(1,1), (1,0)],
+    [(1,1), (0,1)],
+    ]
+
+for pairs in tests:
+    print(f"Removing walls {pairs}...")
+    maze2.remove_walls(pairs[0], pairs[1])
+    for rows in maze2.grid:
+        print(rows)
+    print(f"\nAdding walls {pairs}...")
+    maze2.add_walls_back(pairs[0], pairs[1])
+    print("Asserting grid after adding walls back...\n")
+    assert maze2.grid == before, f"grid is not the same as before\n {maze2.grid}\n {before}"
+
+
+
+

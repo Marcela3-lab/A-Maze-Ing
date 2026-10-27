@@ -5,7 +5,7 @@ class Mazegenerator:
     EAST: int = 2
     SOUTH: int = 4
     WEST: int = 8
-    DEADENDS = {7, 11, 13, 14}
+    DEADENDS: set[int] = {7, 11, 13, 14}
 
 
     #width = col, height = row ==> use (row, col)
@@ -14,6 +14,8 @@ class Mazegenerator:
             #entry: tuple = (0,0), exit: tuple = (0,0),
             perfect: bool = True,
             seed = None,
+            entry: tuple[int, int],
+            exit: tuple[int, int],
         ) -> None:
         if width <= 0:
             raise ValueError("width must be >= 0")
@@ -23,8 +25,8 @@ class Mazegenerator:
             raise ValueError("height must be .= 0")
         else:
             self.height: int = height
-        #self.entry: tuple = entry // condicoes: entry!= exit, e dentro da grelha
-        #self.exit: tuple = exit
+        self.entry = entry # condicoes: entry!= exit, e dentro da grelha <<<<<<<======== CRITERIOS
+        self.exit = exit
         self.perfect: bool = perfect
         self.grid: list[list[int]] = []
         self.visited: set[tuple[int, int]] = set()
@@ -35,6 +37,7 @@ class Mazegenerator:
             self.seed = seed
         self.randgen = random.Random(self.seed)
         self.fortytwo_cells: list[tuple[int, int]] = []
+        self.path_visited = set()
 
 
     def setupgrid(self):
@@ -195,13 +198,17 @@ class Mazegenerator:
         else:
             left = (row, col-1)
 
-        if top is not None and top not in self.fortytwo_cells and (cell & self.NORTH) != 0:
+        if (top is not None and top not in self.fortytwo_cells
+            and (cell & self.NORTH) != 0):
             braids.append(top)
-        if right is not None and right not in self.fortytwo_cells:
+        if (right is not None and right not in self.fortytwo_cells
+            and (cell & self.EAST) != 0):
             braids.append(right)
-        if bottom is not None and bottom not in self.fortytwo_cells:
+        if (bottom is not None and bottom not in self.fortytwo_cells
+            and (cell & self.SOUTH) != 0):
             braids.append(bottom)
-        if left is not None and left not in self.fortytwo_cells:
+        if (left is not None and left not in self.fortytwo_cells
+            and (cell & self.WEST) != 0):
             braids.append(left)
         
         return braids
@@ -243,7 +250,6 @@ class Mazegenerator:
         return self.grid[row][col] in self.DEADENDS
 
 
-
     def add_walls_back(
         self, current: tuple[int, int], candidate: tuple[int, int]
         ) -> None:
@@ -269,7 +275,6 @@ class Mazegenerator:
             self.grid[current[0]][current[1]] |= self.NORTH
 
 
-
     def braiding_maze(self) -> None:
 
         for row in range(len(self.grid)):
@@ -277,9 +282,6 @@ class Mazegenerator:
                 current = (row, col)
                 if self.is_deadend(current):
                     braid_nghb = self.get_braid_neighbors(row, col)
-                    if current in [(6,0), (2,2)]:
-                        print(self.grid)
-                        print(f"DEBUG 1: braid neighbors for {current}: {braid_nghb}\n")
                     self.randgen.shuffle(braid_nghb) #shuffle da lista
                     deads = []
                     no_deads = []
@@ -289,22 +291,75 @@ class Mazegenerator:
                         else:
                             no_deads.append(neighbor)
                     final_list = deads + no_deads #sort list so deadends are first
-                    if current in [(6,0), (2,2)]:
-                        print(f"DEBUG 1.1: neighbors final list for {current}: {final_list}\n")
-                        print(f"DEBUG 1.2: deads: {deads}\n")
-                        print(f"DEBUG 1.2: no_deads: {no_deads}\n")
 
                     for candidate in final_list:
-                        if current in [(6,0), (2,2)]:
-                            print(f"DEBUG 2.1: candidate= {candidate}")
                         self.remove_walls(current, candidate)
-                        if current in [(6,0), (2,2)]:
-                            print(self.grid)
-                            print(f"DEBUG 2.2: {current} open areas: {self.verify_open_areas(current)}\n")
                         if self.verify_open_areas(current):
                             self.add_walls_back(current, candidate)
                         else:
                             break
+
+
+    def get_path_nghb(self, active: tuple[int, int]) -> list[tuple[int, int]]:
+    #width = col, height = row ==> use (row, col)
+        row, col = active
+        path_nghb = []
+
+        if row == 0:
+            top = None
+        else:
+            top = (row-1, col)
+        if col == self.width-1:
+            right = None
+        else:
+            right = (row, col+1)
+        if row == self.height-1:
+            bottom = None
+        else:
+            bottom = (row+1, col)
+        if col == 0:
+            left = None
+        else:
+            left = (row, col-1)
+
+        if (top is not None
+            and top not in self.fortytwo_cells 
+            and top not in self.path_visited
+            and (self.grid[row][col] & self.NORTH) == 0):
+            path_nghb.append(top)
+
+        if (right is not None
+            and right not in self.fortytwo_cells
+            and right not in self.path_visited
+            and (self.grid[row][col] & self.EAST) == 0):
+            path_nghb.append(right)
+
+        if (bottom is not None
+            and bottom not in self.fortytwo_cells
+            and bottom not in self.path_visited
+            and (self.grid[row][col] & self.SOUTH) == 0):
+            path_nghb.append(bottom)
+
+        if (left is not None
+            and left not in self.fortytwo_cells
+            and left not in self.path_visited
+            and (self.grid[row][col] & self.WEST) == 0):
+            path_nghb.append(left)
+
+        return path_nghb
+
+
+    def solve_maze(self) -> None:
+        queue = []
+
+        queue.append(self.start)
+        self.path_visited.add(self.start)  
+        while queue:
+            active = queue.pop(0)
+            path_nghb = self.get_path_nghb(active)
+            for neighbor in path_nghb:
+                self.path_visited.add(neighbor)
+                queue.append(neighbor)
 
 
     def generate(self) -> None:

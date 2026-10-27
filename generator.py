@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import random
 
+
 class Mazegenerator:
     NORTH: int = 1
     EAST: int = 2
@@ -14,7 +15,7 @@ class Mazegenerator:
             self, width: int, height: int,
             #entry: tuple = (0,0), exit: tuple = (0,0),
             perfect: bool = True,
-            seed: int | None = None,
+            seed = None,
         ) -> None:
         if width <= 0:
             raise ValueError("width must be >= 0")

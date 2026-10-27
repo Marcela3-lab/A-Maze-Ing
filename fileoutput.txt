@@ -1,0 +1,6 @@
+from generator import Mazegenerator
+from parsing import write_output
+
+maze = Mazegenerator(10, 10)
+maze.generate()
+write_output("output.txt", maze.grid, (0, 0), (9, 9), "SSEE")

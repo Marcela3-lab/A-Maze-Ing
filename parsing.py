@@ -33,17 +33,17 @@ def parse_int(key: str, value:str) -> int:
 
 def parse_coords(key: str, value:str) -> tuple[int,int]:
     cord = value.split(",")
-    if len(cord) == 2:
+    if len(cord) != 2:
+        raise ConfigError(
+            f"Número de coordenadas {key} não esperado! "
+            f"Esperam-se 2 coordenadas; recebido '{len(cord)}'"
+        )
+    elif len(cord) == 2:
         try:
             x = int(cord[0].strip())
             y = int(cord[1].strip())
         except (ValueError):
             raise ConfigError(f"Erro ao tentar converter as coordenadas {value}! Apenas inteiros são aceitos")
-    elif len(cord) != 2:
-        raise ConfigError(
-            f"Número de coordenadas {key} não esperado! "
-            f"Esperam-se 2 coordenadas; recebido '{len(cord)}'"
-        )
     return (x,y)
 
 
@@ -93,3 +93,34 @@ def validate_config(raw: dict[str, str]) -> dict:
     if config["ENTRY"] == config["EXIT"]:
         raise ConfigError("ENTRY e EXIT têm de ser diferentes")
     return config
+
+def load_config(path: str) -> dict[str, Any]:
+    """Lê e valida o ficheiro de configuração."""
+    return validate_config(read_config_file(path))
+
+def cell_to_hex(cell: int) -> str:
+    """Converte a celula em hexadecimal"""
+    if not 0 <= cell <= 15:
+        raise ConfigError(f"cell:{cell}, o valor prescisa estar entre >= que 0 e <= que 15")
+    return f"{cell:X}"
+
+def write_output(
+        path:str,
+        grid:list[list[int]],
+        entry:tuple[int,int],
+        exit_:tuple[int,int],
+        solution:str,
+                )-> None:
+    """Escreve o labirinto no ficheiro de saida"""
+    try:
+        with open (path, "w", encoding="utf-8") as file:
+            for row in grid:
+                line = "".join(cell_to_hex(cell) for cell in row)
+                file.write(line + "\n")
+            file.write("\n")
+            file.write(f"{entry[0],entry[1]}\n")
+            file.write(f"{exit_[0],exit_[1]}\n")
+            file.write(solution + "\n")
+    except OSError as err:
+        raise(f"Erro no file '{path}', erro:'{err}")
+

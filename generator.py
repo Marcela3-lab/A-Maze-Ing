@@ -176,6 +176,7 @@ class Mazegenerator:
         Used for PERFECT=false.'''
 
         braids = []
+        cell = self.grid[row][col]
 
         if row == 0:
             top = None
@@ -194,7 +195,7 @@ class Mazegenerator:
         else:
             left = (row, col-1)
 
-        if top is not None and top not in self.fortytwo_cells:
+        if top is not None and top not in self.fortytwo_cells and (cell & self.NORTH) != 0:
             braids.append(top)
         if right is not None and right not in self.fortytwo_cells:
             braids.append(right)
@@ -288,12 +289,18 @@ class Mazegenerator:
                         else:
                             no_deads.append(neighbor)
                     final_list = deads + no_deads #sort list so deadends are first
+                    if current in [(6,0), (2,2)]:
+                        print(f"DEBUG 1.1: neighbors final list for {current}: {final_list}\n")
+                        print(f"DEBUG 1.2: deads: {deads}\n")
+                        print(f"DEBUG 1.2: no_deads: {no_deads}\n")
 
                     for candidate in final_list:
+                        if current in [(6,0), (2,2)]:
+                            print(f"DEBUG 2.1: candidate= {candidate}")
                         self.remove_walls(current, candidate)
                         if current in [(6,0), (2,2)]:
                             print(self.grid)
-                            print(f"DEBUG 2: {current} open areas: {self.verify_open_areas(current)}\n")
+                            print(f"DEBUG 2.2: {current} open areas: {self.verify_open_areas(current)}\n")
                         if self.verify_open_areas(current):
                             self.add_walls_back(current, candidate)
                         else:

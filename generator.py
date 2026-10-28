@@ -1,13 +1,11 @@
-#!/usr/bin/python3
 import random
-
 
 class Mazegenerator:
     NORTH: int = 1
     EAST: int = 2
     SOUTH: int = 4
     WEST: int = 8
-    DEADENDS = [7, 11, 13, 14]
+    DEADENDS: set[int] = {7, 11, 13, 14}
 
 
     #width = col, height = row ==> use (row, col)
@@ -16,6 +14,8 @@ class Mazegenerator:
             #entry: tuple = (0,0), exit: tuple = (0,0),
             perfect: bool = True,
             seed = None,
+            entry: tuple[int, int],
+            exit: tuple[int, int],
         ) -> None:
         if width <= 0:
             raise ValueError("width must be >= 0")
@@ -25,8 +25,8 @@ class Mazegenerator:
             raise ValueError("height must be .= 0")
         else:
             self.height: int = height
-        #self.entry: tuple = entry // condicoes: entry!= exit, e dentro da grelha
-        #self.exit: tuple = exit
+        self.entry = entry # condicoes: entry!= exit, e dentro da grelha <<<<<<<======== CRITERIOS
+        self.exit = exit
         self.perfect: bool = perfect
         self.grid: list[list[int]] = []
         self.visited: set[tuple[int, int]] = set()
@@ -37,6 +37,7 @@ class Mazegenerator:
             self.seed = seed
         self.randgen = random.Random(self.seed)
         self.fortytwo_cells: list[tuple[int, int]] = []
+        self.path_visited = set()
 
 
     def setupgrid(self):
@@ -119,7 +120,7 @@ class Mazegenerator:
         (tuples) to help the design in the terminal'''
 
         #validate enough space in grid for design
-        if self.width >= 9 or self.height >= 7:
+        if self.width >= 9 and self.height >= 7:
             #find center. width = col, height = row ==> use (row, col)
             c_row = int(self.height/2)
             c_col = int(self.width/2)
@@ -154,8 +155,7 @@ class Mazegenerator:
 
             # STEP 2.a: Pop a cell from the stack and make it a current cell
             current = self.stack.pop()
-            row = current[0]
-            col = current[1]
+            row, col = current
 
             # STEP 2.b: If the current cell has any neighbours which have not been visited
             #pick random neighbor as next cell
@@ -179,6 +179,7 @@ class Mazegenerator:
         Used for PERFECT=false.'''
 
         braids = []
+        cell = self.grid[row][col]
 
         if row == 0:
             top = None
@@ -197,31 +198,33 @@ class Mazegenerator:
         else:
             left = (row, col-1)
 
-        if top is not None and top not in self.fortytwo_cells:
+        if (top is not None and top not in self.fortytwo_cells
+            and (cell & self.NORTH) != 0):
             braids.append(top)
-        if right is not None and right not in self.fortytwo_cells:
+        if (right is not None and right not in self.fortytwo_cells
+            and (cell & self.EAST) != 0):
             braids.append(right)
-        if bottom is not None and bottom not in self.fortytwo_cells:
+        if (bottom is not None and bottom not in self.fortytwo_cells
+            and (cell & self.SOUTH) != 0):
             braids.append(bottom)
-        if left is not None and left not in self.fortytwo_cells:
+        if (left is not None and left not in self.fortytwo_cells
+            and (cell & self.WEST) != 0):
             braids.append(left)
         
-            return braids
+        return braids
 
 
     def is_block_open(self, corner: tuple[int, int]) -> bool:
-        row = corner[0]
-        col = corner[1]  
+        '''checks if there is a 3x3 block open for the upper left corner'''
+        row, col = corner
         
         for r in range(3):
-            if row + r <= self.height - 1:
-                for c in range(3):
-                    if (col + c) <= self.width - 1:
-                        cell = self.grid[row+r][col+c]
-                        if cell & self.EAST != 0 and c != 2:
-                            return False
-                        if cell & self.SOUTH != 0 and r != 2:
-                            return False
+            for c in range(3):
+                cell = self.grid[row+r][col+c]
+                if cell & self.EAST != 0 and c != 2:
+                    return False
+                if cell & self.SOUTH != 0 and r != 2:
+                    return False
         return True                        
             
 
@@ -231,13 +234,11 @@ class Mazegenerator:
         3x3 blocks excluding edge cases. Verifies if any block is open by
         calling another function and returns True if there is an open area.'''
 
-        row = current[0]
-        col = current[1]
-
+        row, col = current
         for r in range(3):
-            if (row - r >= 0):
+            if row - r >= 0 and row - r + 2 <= self.height - 1:
                 for c in range(3):
-                    if(col - c >= 0):
+                    if col - c >= 0 and col - c + 2 <= self.width - 1:
                         corner = (row - r, col - c)
                         if self.is_block_open(corner):
                             return True
@@ -245,12 +246,33 @@ class Mazegenerator:
     
     
     def is_deadend(self, cell: tuple[int, int]) -> bool:
-        row = cell[0]
-        col = cell[1]
-        if self.grid[row][col] in self.DEADENDS:
-            return True
-        else:
-            return False
+        row, col = cell    # == row = cell[0], col = cell[1]
+        return self.grid[row][col] in self.DEADENDS
+
+
+    def add_walls_back(
+        self, current: tuple[int, int], candidate: tuple[int, int]
+        ) -> None:
+        '''adds wall that has been removed in the brading process 
+        between current & candidate neighbor cells.
+        It's called if after opening wall for PERFECT=false,
+        a 3x3 open block is created.'''
+
+        col = candidate[1] - current[1]
+        if col == 1:
+            self.grid[candidate[0]][candidate[1]] |= self.WEST
+            self.grid[current[0]][current[1]] |= self.EAST
+        elif col == -1:
+            self.grid[candidate[0]][candidate[1]] |= self.EAST
+            self.grid[current[0]][current[1]] |= self.WEST
+        
+        row = candidate[0] - current[0]
+        if row == 1:
+            self.grid[candidate[0]][candidate[1]] |= self.NORTH
+            self.grid[current[0]][current[1]] |= self.SOUTH
+        elif row == -1:
+            self.grid[candidate[0]][candidate[1]] |= self.SOUTH
+            self.grid[current[0]][current[1]] |= self.NORTH
 
 
     def braiding_maze(self) -> None:
@@ -259,7 +281,7 @@ class Mazegenerator:
             for col in range(len(self.grid[row])):
                 current = (row, col)
                 if self.is_deadend(current):
-                    braid_nghb = self.get_braid_nghbors(row, col)
+                    braid_nghb = self.get_braid_neighbors(row, col)
                     self.randgen.shuffle(braid_nghb) #shuffle da lista
                     deads = []
                     no_deads = []
@@ -268,7 +290,7 @@ class Mazegenerator:
                             deads.append(neighbor)
                         else:
                             no_deads.append(neighbor)
-                    final_list = deads + no_deads
+                    final_list = deads + no_deads #sort list so deadends are first
 
                     for candidate in final_list:
                         self.remove_walls(current, candidate)
@@ -276,6 +298,68 @@ class Mazegenerator:
                             self.add_walls_back(current, candidate)
                         else:
                             break
+
+
+    def get_path_nghb(self, active: tuple[int, int]) -> list[tuple[int, int]]:
+    #width = col, height = row ==> use (row, col)
+        row, col = active
+        path_nghb = []
+
+        if row == 0:
+            top = None
+        else:
+            top = (row-1, col)
+        if col == self.width-1:
+            right = None
+        else:
+            right = (row, col+1)
+        if row == self.height-1:
+            bottom = None
+        else:
+            bottom = (row+1, col)
+        if col == 0:
+            left = None
+        else:
+            left = (row, col-1)
+
+        if (top is not None
+            and top not in self.fortytwo_cells 
+            and top not in self.path_visited
+            and (self.grid[row][col] & self.NORTH) == 0):
+            path_nghb.append(top)
+
+        if (right is not None
+            and right not in self.fortytwo_cells
+            and right not in self.path_visited
+            and (self.grid[row][col] & self.EAST) == 0):
+            path_nghb.append(right)
+
+        if (bottom is not None
+            and bottom not in self.fortytwo_cells
+            and bottom not in self.path_visited
+            and (self.grid[row][col] & self.SOUTH) == 0):
+            path_nghb.append(bottom)
+
+        if (left is not None
+            and left not in self.fortytwo_cells
+            and left not in self.path_visited
+            and (self.grid[row][col] & self.WEST) == 0):
+            path_nghb.append(left)
+
+        return path_nghb
+
+
+    def solve_maze(self) -> None:
+        queue = []
+
+        queue.append(self.start)
+        self.path_visited.add(self.start)  
+        while queue:
+            active = queue.pop(0)
+            path_nghb = self.get_path_nghb(active)
+            for neighbor in path_nghb:
+                self.path_visited.add(neighbor)
+                queue.append(neighbor)
 
 
     def generate(self) -> None:
@@ -288,34 +372,10 @@ class Mazegenerator:
         self.fortytwo()
         self.dfs()
         
-
-if __name__ == "__main__":
-
-    width = 10 #num de elementos por lista
-    height = 10 #num de listas
-
-    testmaze = Mazegenerator(width, height)
-    # testmaze.setupgrid()
+        if self.perfect == False:
+            self.braiding_maze()
+        
     
-    # print(f"GRID BEFORE: {testmaze.grid}")
-    # print("---test check neighbors function ---")
-    # next_cell = testmaze.unvisited_neighbor(0, 0)
-    # print(f"next cell: {next_cell}")
-
-    # print("---test DFS function ---")
-    # testmaze.dfs()
-    # print(f"len visited: {len(testmaze.visited)}")
-    # print(f"GRID AFTER: {testmaze.grid}")
-
-    # print(" --- Test 42 function --- ")
-    # testlist = testmaze.fortytwo()
-    # print(f"\ntestlist: {testlist}")
-
-    testmaze.generate()
-    print("Result! grid:")
-    for lines in testmaze.grid:
-        form = list(map("{:02d}".format, lines))
-        print(form)
 
 
 

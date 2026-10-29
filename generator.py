@@ -17,18 +17,21 @@ class Mazegenerator:
             seed = None,
         ) -> None:
         '''Converts Entry(x,y) and Exit(x,y) to (y,x)=(row,col)'''
-        if width <= 2 or width > 100:
+        if width < 2 or width > 100:
             raise ValueError("Maze's width must be >= 2 and <= 100")
         else:
             self.width: int = width
-        if height <= 2 or height > 100:
-            raise ValueError("Maze's height must be >= 2 and <=")
+        if height < 2 or height > 100:
+            raise ValueError("Maze's height must be >= 2 and <= 100")
         else:
             self.height: int = height
         self.entry_conv_yx = self.validate_convert_coord(entry_xy)
         self.exit_conv_yx = self.validate_convert_coord(exit_xy)
         if entry_xy == exit_xy:
             raise ValueError("Error: Entry and Exit coordinates are equal")
+        else:
+            self.entry_xy = entry_xy
+            self.exit_xy = exit_xy
         self.perfect: bool = perfect
         self.grid: list[list[int]] = []
         self.visited: set[tuple[int, int]] = set()
@@ -39,7 +42,7 @@ class Mazegenerator:
             self.seed = seed
         self.randgen = random.Random(self.seed)
         self.fortytwo_cells: list[tuple[int, int]] = []
-        self.path_parents: dict[] = {self.entry_conv_yx: self.entry_conv_yx}
+        self.path_parents: dict = {self.entry_conv_yx: self.entry_conv_yx}
         self.path: list[str] = []
 
 
@@ -406,19 +409,27 @@ class Mazegenerator:
             raise ValueError("Can't find shortest path")
 
         
-        def generate(self) -> None:
-            '''Builds the maze with 42 design, if possible, and generates
-        the path.'''
+    def generate(self) -> None:
+        '''Generates the maze with DFS algorithm and the shortest path
+        with BFS algorithm.'''
         self.setupgrid()
         if len(self.grid) == 0:
             raise ValueError("Grid setup Error: Invalid data")
         
         self.fortytwo()
-        #raise exceptions: entry e exit fora do 42 ===================================<<<<<<
+        if self.entry_conv_yx in self.fortytwo_cells:
+            raise ValueError(
+                "Error: entry is unreachable - falls inside 42 design")
+        if self.exit_conv_yx in self.fortytwo_cells:
+            raise ValueError(
+                "Error: exit is unreachable - falls inside 42 design")
+
         self.dfs()
         
         if self.perfect == False:
             self.braiding_maze()
+
+        self.solve_maze_bfs()
 
         
     

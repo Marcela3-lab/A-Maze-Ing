@@ -2,8 +2,17 @@ from generator import Mazegenerator
 
 
 #w = x = col, h = y = row ==> use (row, col)
-
-maze = Mazegenerator(width=3, height=7, seed=3)
+w = 4
+h = 4
+s= 8
+maze = Mazegenerator(
+    width=w,
+    height=h,
+    seed=s,
+    entry_xy= (0,0),
+    exit_xy= (w-1, h-1),
+    perfect=False,
+    )
 maze.generate()
 for rows in maze.grid:
     print(rows)
@@ -12,19 +21,9 @@ for rows in range(maze.height):
     for cols in range(maze.width):
        if maze.is_deadend((rows, cols)):
            count_deadends += 1
-print(f"Perfect | count of deadends = {count_deadends}\n")
+print(f"Perfect = {maze.perfect} | count of deadends = {count_deadends}\n")
 
-maze.braiding_maze()
-count_deadends = 0
-for rows in range(maze.height):
-    for cols in range(maze.width):
-       if maze.is_deadend((rows, cols)):
-           count_deadends += 1
-print(f"\nBraiding | count of deadends = {count_deadends}")
-for rows in maze.grid:
-    print(rows)
-
-print("\nCounting Loops")
+print("Counting Loops")
 j = 0
 for lista in maze.grid:
     for cell in lista:

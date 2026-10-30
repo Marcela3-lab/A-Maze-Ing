@@ -1,0 +1,6 @@
+Error: 4x4, seed=6, perfect=False
+loops= 1, j=16, 42cells=0
+
+Error: 4x4, seed=8, perfect=False
+loops= 1, j=16, 42cells=0
+

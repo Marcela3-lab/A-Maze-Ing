@@ -3,6 +3,8 @@ from generator import Mazegenerator
 #w = x = col, h = y = row ==> use (row, col)
 
 def coherence(maze):
+    h = maze.height
+    w = maze.width
     #For all cells, side neighbors have East/West bits equal
     for lista in maze.grid:
         for x in range(len(lista)-1):
@@ -95,41 +97,52 @@ def open_areas(maze):
 def allcells_visited(maze):
     w = maze.width
     h = maze.height
-    if len(maze.visited) != w*h - len(maze.fortytwo_cells):
+    if len(maze.visited) != w*h:
         raise AssertionError(
-            f"not all cells were visited for w={w}, h={h}, "
-            f"visited={len(maze.visited)}, 42cells={maze.fortytwo_cells}")
+            f"not all cells were visited for w={w}, h={h}, visited={len(maze.visited)}")
 
 
 
 if __name__ == "__main__":
 
-    sizes= [(10,15), (4,4), (13,17), (17,3), (2,2), (3,7), (7,3), (50, 50), (100, 100)]
-
-    for combo in sizes:
-        w, h = combo
-        for seed in range(5):
-            for perfect in (True, False):
-                maze = Mazegenerator(
-                    width= w,
-                    height = h,
-                    entry_xy= (0,0),
-                    exit_xy= (w-1, h-1),
-                    perfect= perfect,
-                    seed = seed,
-                )
-                print(f">> Generating maze {w}x{h}, seed={seed}, perfect={perfect}...\n")
-                maze.generate()
-                assert len(maze.visited) == w*h - len(maze.fortytwo_cells), f"not all cells were visited for w={w}, h={h}"
-                try:
-                    allcells_visited(maze)
-                    coherence(maze)
-                    closed_borders(maze)
-                    if not maze.perfect:
-                        loops(maze)
-                        open_areas(maze)
-                    test_final_path(maze)
-                except AssertionError:
-                    print(f"Error: {w}x{h}, seed={seed}, perfect={perfect}")
-                    raise
-                print("[OK]\n")
+    sizes= [(10,15), (4,4), (13,17), (17,3), (2,2), (5,5), (3,7), (7,3), (50, 50), (100, 100)]
+    passed = 0
+    failed = 0
+    with open("tests.txt", "w") as log:
+        for combo in sizes:
+            w, h = combo
+            n = w*h
+            if n > 1500:
+                n = 7
+            else:
+                n = 9
+            for seed in range(n):
+                for perfect in (True, False):
+                    try:
+                        maze = Mazegenerator(
+                            width= w,
+                            height = h,
+                            entry_xy= (0,0),
+                            exit_xy= (w-1, h-1),
+                            perfect= perfect,
+                            seed = seed,
+                        )
+                        maze.generate()
+                        allcells_visited(maze)
+                        coherence(maze)
+                        closed_borders(maze)
+                        if not maze.perfect:
+                            loops(maze)
+                            open_areas(maze)
+                        test_final_path(maze)
+                    except Exception as e:
+                        log.write(f"Error: {w}x{h}, seed={seed}, perfect={perfect}\n")
+                        log.write(f"{e}\n\n")
+                        failed += 1
+                    else:
+                        passed += 1
+                    print(f"A testar: {passed} OK, {failed} KO", end="\r", flush=True)
+    print()
+    print(f"Failed Tests: {failed}")
+    print(f"Passed Tests: {passed}")
+    print(f"Check Failed tests in tests.txt")

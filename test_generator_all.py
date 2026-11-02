@@ -131,7 +131,7 @@ if __name__ == "__main__":
                         allcells_visited(maze)
                         coherence(maze)
                         closed_borders(maze)
-                        if not maze.perfect:
+                        if maze.perfect == False:
                             loops(maze)
                             open_areas(maze)
                         test_final_path(maze)
@@ -141,7 +141,35 @@ if __name__ == "__main__":
                         failed += 1
                     else:
                         passed += 1
-                    print(f"A testar: {passed} OK, {failed} KO", end="\r", flush=True)
+                    print(f"Testing: {passed} OK, {failed} KO", end="\r", flush=True)
+        try:
+            maze2 = Mazegenerator(
+                width= 10,
+                height = 15,
+                entry_xy= (0,0),
+                exit_xy= (10-1, 15-1),
+                perfect= True,
+                seed = 1,
+            )        
+            maze2.generate()
+            maze2.generate()
+            allcells_visited(maze2)
+            coherence(maze2)
+            closed_borders(maze2)
+            if maze2.perfect == False:
+                loops(maze2)
+                open_areas(maze2)
+            test_final_path(maze2)
+        except Exception as e:
+            log.write(f"Error Maze2")
+            log.write(f"{e}\n\n")
+            failed += 1
+        else:
+            passed += 1
+        print(f"Testing: {passed} OK, {failed} KO", end="\r", flush=True)
+                    
+        
+        
     print()
     print(f"Failed Tests: {failed}")
     print(f"Passed Tests: {passed}")

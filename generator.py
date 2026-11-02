@@ -190,8 +190,8 @@ class Mazegenerator:
 
     def get_braid_neighbors(self, row: int, col: int) -> list[tuple[int, int]] | None:
         '''checks neighbors of current (row, col) cell. 
-        Adds to a list if not in 42 design. Returns a list of tuples.
-        Used for PERFECT=false.'''
+        Adds to a list if not in 42 design and wall is not open. 
+        Returns a list of tuples. Used for PERFECT=false.'''
 
         braids = []
         cell = self.grid[row][col]
@@ -290,6 +290,20 @@ class Mazegenerator:
             self.grid[current[0]][current[1]] |= self.NORTH
 
 
+    def count_loops(self) -> int:
+        j = 0
+        w = self.width
+        h = self.height
+        for lista in self.grid:
+            for cell in lista:
+                if cell & self.EAST == 0:
+                    j += 1
+                if cell & self.SOUTH == 0:
+                    j += 1
+        loops = j - (w * h - len(self.fortytwo_cells)) + 1
+        return loops
+
+
     def braiding_maze(self) -> None:
 
         for row in range(len(self.grid)):
@@ -313,7 +327,25 @@ class Mazegenerator:
                             self.add_walls_back(current, candidate)
                         else:
                             break
-
+        
+        loops = self.count_loops()
+        if loops < 2:
+            for row in range(len(self.grid)):
+                for col in range(len(self.grid[row])):
+                    current = (row, col)
+                    loop_nghbrs = self.get_braid_neighbors(row, col)
+                    self.randgen.shuffle(loop_nghbrs)
+                    for chosen in loop_nghbrs:
+                        self.remove_walls(current, chosen)
+                        if self.verify_open_areas(current):
+                            self.add_walls_back(current, chosen)
+                        else:
+                            loops += 1
+                            break
+                    if loops >= 2:
+                        return
+                        
+            
 
     def get_path_nghb(self, active: tuple[int, int]) -> list[tuple[int, int]]:
     #width = col, height = row ==> use (row, col)
@@ -408,13 +440,19 @@ class Mazegenerator:
         if len(self.path) == 0:
             raise ValueError("Can't find shortest path")
 
+
+    def reset_state(self) -> None:
+        
+
         
     def generate(self) -> None:
-        '''Generates the maze with DFS algorithm and the shortest path
-        with BFS algorithm.'''
+        '''Resets state of object variables, in order to regenerate 
+        with empty values. Generates the maze with DFS algorithm and the
+        shortest path with BFS algorithm.'''
+        self.reset_state()
         self.setupgrid()
         if len(self.grid) == 0:
-            raise ValueError("Grid setup Error: Invalid data")
+            raise ValueError("Invalid Data: Grid Empty")
         
         self.fortytwo()
         if self.entry_conv_yx in self.fortytwo_cells:

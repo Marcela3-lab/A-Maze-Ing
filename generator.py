@@ -33,17 +33,18 @@ class Mazegenerator:
             self.entry_xy = entry_xy
             self.exit_xy = exit_xy
         self.perfect: bool = perfect
-        self.grid: list[list[int]] = []
-        self.visited: set[tuple[int, int]] = set()
-        self.stack: list[tuple[int, int]] = []
         if seed is None:
             self.seed = random.randrange(1, 2**32)
         else:
             self.seed = seed
         self.randgen = random.Random(self.seed)
-        self.fortytwo_cells: list[tuple[int, int]] = []
-        self.path_parents: dict = {self.entry_conv_yx: self.entry_conv_yx}
-        self.path: list[str] = []
+        self.reset_state()
+        # self.fortytwo_cells: list[tuple[int, int]] = []
+        # self.path_parents: dict = {self.entry_conv_yx: self.entry_conv_yx}
+        # self.path: list[str] = []
+        # self.grid: list[list[int]] = []
+        # self.visited: set[tuple[int, int]] = set()
+        # self.stack: list[tuple[int, int]] = []
 
 
     def validate_convert_coord(self, coord_xy: tuple[int, int]) -> tuple[int, int]:
@@ -442,9 +443,14 @@ class Mazegenerator:
 
 
     def reset_state(self) -> None:
-        
+        self.grid: list[list[int]] = []
+        self.visited: set[tuple[int, int]] = set()
+        self.stack: list[tuple[int, int]] = []
+        self.fortytwo_cells: list[tuple[int, int]] = []
+        self.path_parents: dict = {self.entry_conv_yx: self.entry_conv_yx}
+        self.path: list[str] = []
 
-        
+
     def generate(self) -> None:
         '''Resets state of object variables, in order to regenerate 
         with empty values. Generates the maze with DFS algorithm and the

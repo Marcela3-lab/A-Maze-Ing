@@ -17,18 +17,21 @@ class Mazegenerator:
             seed = None,
         ) -> None:
         '''Converts Entry(x,y) and Exit(x,y) to (y,x)=(row,col)'''
-        if width <= 2 or width > 100:
+        if width < 2 or width > 100:
             raise ValueError("Maze's width must be >= 2 and <= 100")
         else:
             self.width: int = width
-        if height <= 2 or height > 100:
-            raise ValueError("Maze's height must be >= 2 and <=")
+        if height < 2 or height > 100:
+            raise ValueError("Maze's height must be >= 2 and <= 100")
         else:
             self.height: int = height
         self.entry_conv_yx = self.validate_convert_coord(entry_xy)
         self.exit_conv_yx = self.validate_convert_coord(exit_xy)
         if entry_xy == exit_xy:
             raise ValueError("Error: Entry and Exit coordinates are equal")
+        else:
+            self.entry_xy = entry_xy
+            self.exit_xy = exit_xy
         self.perfect: bool = perfect
         self.grid: list[list[int]] = []
         self.visited: set[tuple[int, int]] = set()
@@ -39,10 +42,9 @@ class Mazegenerator:
             self.seed = seed
         self.randgen = random.Random(self.seed)
         self.fortytwo_cells: list[tuple[int, int]] = []
-        '''alteracao self.path_parents: dict[] = {self.entry_conv_yx: self.entry_conv_yx}, versão nao compativel'''
-        self.path_parents: dict[tuple[int, int], tuple[int, int]] = {
-            self.entry_conv_yx: self.entry_conv_yx}
+        self.path_parents: dict = {self.entry_conv_yx: self.entry_conv_yx}
         self.path: list[str] = []
+
 
     def validate_convert_coord(self, coord_xy: tuple[int, int]) -> tuple[int, int]:
         x, y = coord_xy
@@ -188,8 +190,8 @@ class Mazegenerator:
 
     def get_braid_neighbors(self, row: int, col: int) -> list[tuple[int, int]] | None:
         '''checks neighbors of current (row, col) cell. 
-        Adds to a list if not in 42 design. Returns a list of tuples.
-        Used for PERFECT=false.'''
+        Adds to a list if not in 42 design and wall is not open. 
+        Returns a list of tuples. Used for PERFECT=false.'''
 
         braids = []
         cell = self.grid[row][col]
@@ -288,6 +290,20 @@ class Mazegenerator:
             self.grid[current[0]][current[1]] |= self.NORTH
 
 
+    def count_loops(self) -> int:
+        j = 0
+        w = self.width
+        h = self.height
+        for lista in self.grid:
+            for cell in lista:
+                if cell & self.EAST == 0:
+                    j += 1
+                if cell & self.SOUTH == 0:
+                    j += 1
+        loops = j - (w * h - len(self.fortytwo_cells)) + 1
+        return loops
+
+
     def braiding_maze(self) -> None:
 
         for row in range(len(self.grid)):
@@ -311,7 +327,25 @@ class Mazegenerator:
                             self.add_walls_back(current, candidate)
                         else:
                             break
-
+        
+        loops = self.count_loops()
+        if loops < 2:
+            for row in range(len(self.grid)):
+                for col in range(len(self.grid[row])):
+                    current = (row, col)
+                    loop_nghbrs = self.get_braid_neighbors(row, col)
+                    self.randgen.shuffle(loop_nghbrs)
+                    for chosen in loop_nghbrs:
+                        self.remove_walls(current, chosen)
+                        if self.verify_open_areas(current):
+                            self.add_walls_back(current, chosen)
+                        else:
+                            loops += 1
+                            break
+                    if loops >= 2:
+                        return
+                        
+            
 
     def get_path_nghb(self, active: tuple[int, int]) -> list[tuple[int, int]]:
     #width = col, height = row ==> use (row, col)
@@ -406,20 +440,34 @@ class Mazegenerator:
         if len(self.path) == 0:
             raise ValueError("Can't find shortest path")
 
+
+    def reset_state(self) -> None:
+        
+
         
     def generate(self) -> None:
-        '''Builds the maze with 42 design, if possible, and generates
-        the path.'''
+        '''Resets state of object variables, in order to regenerate 
+        with empty values. Generates the maze with DFS algorithm and the
+        shortest path with BFS algorithm.'''
+        self.reset_state()
         self.setupgrid()
         if len(self.grid) == 0:
-            raise ValueError("Grid setup Error: Invalid data")
+            raise ValueError("Invalid Data: Grid Empty")
         
         self.fortytwo()
-        #raise exceptions: entry e exit fora do 42 ===================================<<<<<<
+        if self.entry_conv_yx in self.fortytwo_cells:
+            raise ValueError(
+                "Error: entry is unreachable - falls inside 42 design")
+        if self.exit_conv_yx in self.fortytwo_cells:
+            raise ValueError(
+                "Error: exit is unreachable - falls inside 42 design")
+
         self.dfs()
         
         if self.perfect == False:
             self.braiding_maze()
+
+        self.solve_maze_bfs()
 
         
     

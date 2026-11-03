@@ -8,7 +8,6 @@ class Mazegenerator:
     DEADENDS: set[int] = {7, 11, 13, 14}
 
 
-    #width = col, height = row ==> use (row, col)
     def __init__(
             self, width: int, height: int,
             entry_xy: tuple[int, int],
@@ -16,7 +15,13 @@ class Mazegenerator:
             perfect: bool = True,
             seed = None,
         ) -> None:
-        '''Converts Entry(x,y) and Exit(x,y) to (y,x)=(row,col)'''
+        '''Initializes Maze object.
+        
+        Args:
+            width: width of the maze (columns)
+            height: height of the maze (rows)
+            !! WIP !!
+        '''
         if width < 2 or width > 100:
             raise ValueError("Maze's width must be >= 2 and <= 100")
         else:
@@ -39,12 +44,6 @@ class Mazegenerator:
             self.seed = seed
         self.randgen = random.Random(self.seed)
         self.reset_state()
-        # self.fortytwo_cells: list[tuple[int, int]] = []
-        # self.path_parents: dict = {self.entry_conv_yx: self.entry_conv_yx}
-        # self.path: list[str] = []
-        # self.grid: list[list[int]] = []
-        # self.visited: set[tuple[int, int]] = set()
-        # self.stack: list[tuple[int, int]] = []
 
 
     def validate_convert_coord(self, coord_xy: tuple[int, int]) -> tuple[int, int]:

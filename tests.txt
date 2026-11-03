@@ -1,3 +1,0 @@
-Error Maze2: 100x100, seed=6, perfect=False
-Wall closed for way=E, in (14, 9)
-

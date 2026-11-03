@@ -13,13 +13,12 @@ def generate_maze(config):
         entry_xy=config["ENTRY"],
         exit_xy=config["EXIT"],
         perfect=config["PERFECT"],
+        seed=config["SEED"],
     )
 
     # Gera o labirinto
     maze.generate()
 
-    # Procura o caminho entre ENTRY e EXIT
-    maze.solve_maze_bfs()
 
     # Guarda o labirinto no ficheiro de saída
     write_output(
@@ -36,8 +35,8 @@ def generate_maze(config):
 def main():
     try:
         config = load_config(CONFIG_FILE)
-        if config["WIDTH"] < 5 or config["HEIGHT"] < 5:
-            print("Erro: O labirinto é demasiado pequeno para colocar o 42. O tamanho mínimo é 5x5.")
+        if config["WIDTH"] < 2 or config["HEIGHT"] < 2:
+            print("Erro: O labirinto é muito pequeno. O tamanho mínimo é 2x2.")
             return
         grid, path, fortytwo = generate_maze(config)
 
@@ -47,6 +46,15 @@ def main():
             config["ENTRY"][1],
             config["ENTRY"][0],
         )
+        if config["WIDTH"] < 9 or config["HEIGHT"] < 8:
+            print("\033[91m")
+            print("=" * 55)
+            print("---> AVISO: LABIRINTO MUITO PEQUENO!")
+            print("=" * 55)
+            print(" Não é possível visualizar o número 42.")
+            print(" Para visualizar, utilize um tamanho mínimo de 9x8.")
+            print("=" * 55 + "\n")
+            print("\033[0m")
 
         display(
             grid,

@@ -442,14 +442,13 @@ class Mazegenerator:
 
 
     def reset_state(self) -> None:
-        
+        pass
 
-        
     def generate(self) -> None:
         '''Resets state of object variables, in order to regenerate 
         with empty values. Generates the maze with DFS algorithm and the
         shortest path with BFS algorithm.'''
-        self.reset_state()
+        #self.reset_state()
         self.setupgrid()
         if len(self.grid) == 0:
             raise ValueError("Invalid Data: Grid Empty")

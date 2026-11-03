@@ -78,9 +78,11 @@ def validate_config(raw: dict[str, str]) -> dict:
             config[key] = parse_bool(key,value)
         elif key == "OUTPUT_FILE":
             config[key] = value
+        elif key == "SEED":
+            config[key] = parse_int(key, value)
         else:
             raise ConfigError(f"Chave de configuração desconhecida: '{key}'")
-
+        config.setdefault("SEED", None)
     if config["WIDTH"] < 1 or config["HEIGHT"] < 1:
         raise ConfigError("A altura e a largura prescisam ser >= 1")
     for name in ("ENTRY", "EXIT"):

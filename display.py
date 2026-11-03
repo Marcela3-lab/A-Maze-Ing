@@ -12,7 +12,7 @@ LETTERS = {"N": NORTH, "E": EAST, "S": SOUTH, "W": WEST}
 
 # Cores de fundo ANSI
 WALL_COLORS = [("branco", 47), ("vermelho", 41), ("magenta", 45),
-               ("ciano", 46),("preto",40)]
+               ("ciano", 46), ("preto", 40)]
 COLORS = {
     "floor": None,   # corredor (sem cor)
     "path": 103,     # amarelo
@@ -143,6 +143,7 @@ def display(grid: list[list[int]], path: Sequence[Step],
 
     while True:
         clear_screen()
+        print()
         canvas = build_canvas(grid, cells, fortytwo, show_path)
         print(render(canvas, WALL_COLORS[color_idx][1]))
         print()

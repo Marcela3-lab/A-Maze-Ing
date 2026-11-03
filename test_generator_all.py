@@ -1,4 +1,4 @@
-from generator import Mazegenerator
+from mazegen import Mazegenerator
 
 #w = x = col, h = y = row ==> use (row, col)
 

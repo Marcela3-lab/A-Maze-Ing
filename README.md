@@ -195,7 +195,7 @@ grid of at least 9x7. In smaller mazes it is omitted and a message is printed.
 ### Install
 
 ```bash
-pip install mazegen-1.0.0-py3-none-any.whl????
+pip install mazegen-2026.1.0-py3-none-any.whl
 ```
 
 To build it again from the sources:
@@ -214,8 +214,7 @@ from generator import Mazegenerator
 maze = Mazegenerator(width=20, height=15,
                      entry_xy=(0, 0), exit_xy=(19, 14),
                      perfect=True, seed=42)
-maze.generate()          # builds the maze
-maze.solve_maze_bfs()    # computes the shortest path
+maze.generate()          # builds the maze and computes the shortest path
 
 print(maze.grid[0])              # first row: [13, 5, 3, 9, ...]
 print("".join(maze.path))        # "EESENEEESENE..."

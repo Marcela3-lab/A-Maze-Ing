@@ -1,0 +1,24 @@
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mazegen"
+version = "2026.1.0"
+requires-python = ">= 3.10"
+authors = [
+  {name = "Filipa Gregorio"},
+  {name = "Marcela Souza"}
+]
+description = "Maze Generator"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE.md"]
+keywords = ["maze generator", "maze", "dfs algorithm", "42 maze"]
+
+[project.urls]
+Repository = "https://github.com/Marcela3-lab/A-Maze-Ing"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mazegen"]
+

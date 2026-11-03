@@ -39,12 +39,6 @@ class Mazegenerator:
             self.seed = seed
         self.randgen = random.Random(self.seed)
         self.reset_state()
-        # self.fortytwo_cells: list[tuple[int, int]] = []
-        # self.path_parents: dict = {self.entry_conv_yx: self.entry_conv_yx}
-        # self.path: list[str] = []
-        # self.grid: list[list[int]] = []
-        # self.visited: set[tuple[int, int]] = set()
-        # self.stack: list[tuple[int, int]] = []
 
 
     def validate_convert_coord(self, coord_xy: tuple[int, int]) -> tuple[int, int]:

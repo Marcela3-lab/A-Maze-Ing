@@ -36,7 +36,9 @@ def generate_maze(config):
 def main():
     try:
         config = load_config(CONFIG_FILE)
-
+        if config["WIDTH"] < 5 or config["HEIGHT"] < 5:
+            print("Erro: O labirinto é demasiado pequeno para colocar o 42. O tamanho mínimo é 5x5.")
+            return
         grid, path, fortytwo = generate_maze(config)
 
         # O display trabalha com (row, col),

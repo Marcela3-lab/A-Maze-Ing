@@ -39,9 +39,10 @@ class Mazegenerator:
             self.seed = seed
         self.randgen = random.Random(self.seed)
         self.fortytwo_cells: list[tuple[int, int]] = []
-        self.path_parents: dict[] = {self.entry_conv_yx: self.entry_conv_yx}
+        '''alteracao self.path_parents: dict[] = {self.entry_conv_yx: self.entry_conv_yx}, versão nao compativel'''
+        self.path_parents: dict[tuple[int, int], tuple[int, int]] = {
+            self.entry_conv_yx: self.entry_conv_yx}
         self.path: list[str] = []
-
 
     def validate_convert_coord(self, coord_xy: tuple[int, int]) -> tuple[int, int]:
         x, y = coord_xy
@@ -406,8 +407,8 @@ class Mazegenerator:
             raise ValueError("Can't find shortest path")
 
         
-        def generate(self) -> None:
-            '''Builds the maze with 42 design, if possible, and generates
+    def generate(self) -> None:
+        '''Builds the maze with 42 design, if possible, and generates
         the path.'''
         self.setupgrid()
         if len(self.grid) == 0:

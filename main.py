@@ -1,5 +1,5 @@
 from parsing import load_config, write_output
-from generator import Mazegenerator
+from mazegen import Mazegenerator
 from display import display
 
 

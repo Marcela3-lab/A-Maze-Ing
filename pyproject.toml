@@ -22,3 +22,11 @@ Repository = "https://github.com/Marcela3-lab/A-Maze-Ing"
 [tool.hatch.build.targets.wheel]
 packages = ["mazegen"]
 
+[tool.hatch.build.targets.sdist]
+include = [
+  "/mazegen",
+  "README.md",
+  "LICENSE.md",
+  "pyproject.toml",
+]
+

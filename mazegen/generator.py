@@ -31,7 +31,7 @@ class Mazegenerator:
             self, width: int, height: int,
             entry_xy: tuple[int, int],
             exit_xy: tuple[int, int],
-            perfect: bool = True,
+            perfect: bool = False,
             seed: int | None = None,
             ) -> None:
         """Initialize the generator and validate its parameters.

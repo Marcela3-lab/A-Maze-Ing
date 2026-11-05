@@ -12,7 +12,7 @@ debug:
 
 clean:
 	rm -rf __pycache__ .mypy_cache .pytest_cache mazegen/__pycache__
-	rm -rf build dist *.egg-info
+	rm -rf build dist *.egg-info $(VENV)
 
 lint:
 	flake8 .
@@ -22,4 +22,4 @@ lint-strict:
 	flake8 .
 	mypy . --strict
 
-.PHONY: install run debug clean lint lint-strict
+.PHONY: install run package debug clean lint lint-strict

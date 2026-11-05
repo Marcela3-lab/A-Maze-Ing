@@ -65,7 +65,7 @@ def parse_bool(key: str, value: str) -> bool:
         )
 
 
-def validate_config(raw: dict[str, str]) -> dict:
+def validate_config(raw: dict[str, str]) -> dict[str, Any]:
     """Check mandatory keys, convert each value to its proper type and
     validate the dimensions, entry and exit. Return the final config"""
     config: dict[str, Any] = {}

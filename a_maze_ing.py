@@ -1,12 +1,15 @@
+from typing import Any, Sequence
+
 from parsing import ConfigError, load_config, write_output
 from mazegen import Mazegenerator
 from display import display
 
-
 CONFIG_FILE = "config.txt"
 
 
-def generate_maze(config):
+def generate_maze(
+    config: dict[str, Any],
+) -> tuple[list[list[int]], Sequence[int | str], list[tuple[int, int]]]:
     """Generate a maze from the config, save it to the output file and
     return (grid, path, fortytwo_cells)."""
     maze = Mazegenerator(
@@ -31,7 +34,7 @@ def generate_maze(config):
     return maze.grid, maze.path, maze.fortytwo_cells
 
 
-def main():
+def main() -> None:
     """Load the config, generate the maze and show it in the terminal
     menu. Print an error message if the config or output file fails."""
     try:

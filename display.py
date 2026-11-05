@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 from __future__ import annotations
- 
+
 from typing import Callable, Sequence, Union
- 
+
 NORTH, EAST, SOUTH, WEST = 1, 2, 4, 8
- 
+
 MOVES = {NORTH: (-1, 0), EAST: (0, 1), SOUTH: (1, 0), WEST: (0, -1)}
 LETTERS = {"N": NORTH, "E": EAST, "S": SOUTH, "W": WEST}
- 
+
 WALL_COLORS = [("branco", 47), ("vermelho", 41), ("magenta", 45),
                ("ciano", 46), ("preto", 40)]
 COLORS = {
@@ -17,16 +17,16 @@ COLORS = {
     "exit": 104,
     "forty": 100,
 }
- 
+
 Cell = tuple[int, int]
 Step = Union[int, str]
- 
- 
+
+
 def normalize_path(path: Sequence[Step]) -> list[int]:
     '''Accept the path as a list of bits (1, 2, 4, 8), a list of letters
     ("N", "E", "S", "W"), or a string ("NESW"). Always return a list
     of bits.'''
-    result = []
+    result: list[int] = []
     for step in path:
         if isinstance(step, str):
             step = LETTERS[step.upper()]
@@ -35,8 +35,8 @@ def normalize_path(path: Sequence[Step]) -> list[int]:
                 f"passo inválido: {step!r} (use 1=N, 2=E, 4=S, 8=W)")
         result.append(step)
     return result
- 
- 
+
+
 def walk(grid: list[list[int]], entry: Cell, steps: list[int]) -> list[Cell]:
     '''Follow the path from the entry and return the list of visited cells
     (including the entry). Validate that no step crosses a wall or leaves
@@ -53,8 +53,8 @@ def walk(grid: list[list[int]], entry: Cell, steps: list[int]) -> list[Cell]:
             raise ValueError(f"passo {i}: saiu da grelha em {(r, c)}")
         cells.append((r, c))
     return cells
- 
- 
+
+
 def build_canvas(grid: list[list[int]], path_cells: list[Cell],
                  fortytwo: list[Cell], show_path: bool) -> list[list[str]]:
     '''Convert the grid into a (2h+1) x (2w+1) matrix. Cells are placed at
@@ -62,7 +62,7 @@ def build_canvas(grid: list[list[int]], path_cells: list[Cell],
     h, w = len(grid), len(grid[0])
     canvas = [["wall"] * (2 * w + 1) for _ in range(2 * h + 1)]
     forty = set(fortytwo)
- 
+
     for r in range(h):
         for c in range(w):
             v = grid[r][c]
@@ -92,7 +92,7 @@ def build_canvas(grid: list[list[int]], path_cells: list[Cell],
 
 def render(canvas: list[list[str]], wall_code: int) -> str:
     '''Convert the matrix into text with ANSI colors (2 spaces per pixel).'''
-    lines = []
+    lines: list[str] = []
     for row in canvas:
         line = ""
         for kind in row:
@@ -132,7 +132,7 @@ def display(grid: list[list[int]], path: Sequence[Step],
     color_idx = 0
     message = ""
 
-    def prepare(g, p):
+    def prepare(g: list[list[int]], p: Sequence[Step]) -> list[Cell]:
         '''Normalize the path p and walk it over grid g, returning the
         list of cells it visits (raises ValueError if it is invalid).'''
         steps = normalize_path(p)

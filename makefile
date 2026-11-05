@@ -2,7 +2,7 @@ PYTHON = python3
 CONFIG = config.txt
 
 install:
-	$(PYTHON) -m pip install flake8 mypy pytest build
+	$(PYTHON) -m pip install flake8 mypy build
 
 run:
 	$(PYTHON) a_maze_ing.py $(CONFIG)

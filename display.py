@@ -1,34 +1,31 @@
 #!/usr/bin/python3
 from __future__ import annotations
-
+ 
 from typing import Callable, Sequence, Union
-
-# Bits das paredes (iguais aos do Mazegenerator)
+ 
 NORTH, EAST, SOUTH, WEST = 1, 2, 4, 8
-
-# direção -> (delta_linha, delta_coluna)
+ 
 MOVES = {NORTH: (-1, 0), EAST: (0, 1), SOUTH: (1, 0), WEST: (0, -1)}
 LETTERS = {"N": NORTH, "E": EAST, "S": SOUTH, "W": WEST}
-
-# Cores de fundo ANSI
+ 
 WALL_COLORS = [("branco", 47), ("vermelho", 41), ("magenta", 45),
-               ("ciano", 46),("preto",40)]
+               ("ciano", 46), ("preto", 40)]
 COLORS = {
-    "floor": None,   # corredor (sem cor)
-    "path": 103,     # amarelo
-    "entry": 102,    # verde
-    "exit": 104,     # azul
-    "forty": 100,    # cinzento (desenho do 42)
+    "floor": None,
+    "path": 103,
+    "entry": 102,
+    "exit": 104,
+    "forty": 100,
 }
-
+ 
 Cell = tuple[int, int]
 Step = Union[int, str]
-
-
+ 
+ 
 def normalize_path(path: Sequence[Step]) -> list[int]:
-    '''Aceita o caminho como lista de bits (1, 2, 4, 8) ou de letras
-    ("N", "E", "S", "W"), ou como string ("NESW"). Devolve sempre
-    uma lista de bits.'''
+    '''Accept the path as a list of bits (1, 2, 4, 8), a list of letters
+    ("N", "E", "S", "W"), or a string ("NESW"). Always return a list
+    of bits.'''
     result = []
     for step in path:
         if isinstance(step, str):
@@ -38,12 +35,12 @@ def normalize_path(path: Sequence[Step]) -> list[int]:
                 f"passo inválido: {step!r} (use 1=N, 2=E, 4=S, 8=W)")
         result.append(step)
     return result
-
-
+ 
+ 
 def walk(grid: list[list[int]], entry: Cell, steps: list[int]) -> list[Cell]:
-    '''Percorre o caminho a partir da entrada e devolve a lista de células
-    visitadas (incluindo a entrada). Valida que cada passo não atravessa
-    parede nem sai da grelha.'''
+    '''Follow the path from the entry and return the list of visited cells
+    (including the entry). Validate that no step crosses a wall or leaves
+    the grid.'''
     h, w = len(grid), len(grid[0])
     r, c = entry
     cells = [entry]
@@ -56,16 +53,16 @@ def walk(grid: list[list[int]], entry: Cell, steps: list[int]) -> list[Cell]:
             raise ValueError(f"passo {i}: saiu da grelha em {(r, c)}")
         cells.append((r, c))
     return cells
-
-
+ 
+ 
 def build_canvas(grid: list[list[int]], path_cells: list[Cell],
                  fortytwo: list[Cell], show_path: bool) -> list[list[str]]:
-    '''Converte a grelha numa matriz (2h+1) x (2w+1). As células ficam nas
-    posições (2r+1, 2c+1) e as paredes nas posições entre elas.'''
+    '''Convert the grid into a (2h+1) x (2w+1) matrix. Cells are placed at
+    positions (2r+1, 2c+1) and walls at the positions between them.'''
     h, w = len(grid), len(grid[0])
     canvas = [["wall"] * (2 * w + 1) for _ in range(2 * h + 1)]
     forty = set(fortytwo)
-
+ 
     for r in range(h):
         for c in range(w):
             v = grid[r][c]
@@ -83,7 +80,6 @@ def build_canvas(grid: list[list[int]], path_cells: list[Cell],
     if show_path:
         prev = path_cells[0]
         for cell in path_cells:
-            # pixel da célula + pixel da parede aberta entre prev e cell
             canvas[2 * cell[0] + 1][2 * cell[1] + 1] = "path"
             canvas[prev[0] + cell[0] + 1][prev[1] + cell[1] + 1] = "path"
             prev = cell
@@ -95,7 +91,7 @@ def build_canvas(grid: list[list[int]], path_cells: list[Cell],
 
 
 def render(canvas: list[list[str]], wall_code: int) -> str:
-    '''Matriz -> texto com cores ANSI (2 espaços por pixel).'''
+    '''Convert the matrix into text with ANSI colors (2 spaces per pixel).'''
     lines = []
     for row in canvas:
         line = ""
@@ -110,10 +106,10 @@ def render(canvas: list[list[str]], wall_code: int) -> str:
 
 
 def clear_screen() -> None:
+    '''Clear the terminal and move the cursor to the top-left corner.'''
     print("\033[2J\033[H", end="")
 
 
-# O que a função "regenerate" tem de devolver: (grid, path, fortytwo)
 Maze = tuple[list[list[int]], Sequence[Step], list[Cell]]
 
 
@@ -121,14 +117,15 @@ def display(grid: list[list[int]], path: Sequence[Step],
             entry: Cell = (0, 0),
             fortytwo: list[Cell] | None = None,
             regenerate: Callable[[], Maze] | None = None) -> None:
-    '''Mostra o labirinto no terminal com um menu.
+    '''Show the maze in the terminal with a menu.
 
-    grid       -- lista de listas de inteiros 0-15 (grid[row][col])
-    path       -- solução: lista de passos (1,2,4,8 ou "N","E","S","W")
-    entry      -- célula (row, col) onde o caminho começa
-    fortytwo   -- células do desenho "42" (opcional)
-    regenerate -- função sem argumentos que devolve (grid, path, fortytwo)
-                  de um labirinto novo. Se None, a opção 1 não aparece.
+    grid       -- list of lists of integers 0-15 (grid[row][col])
+    path       -- solution: list of steps (1, 2, 4, 8 or "N", "E", "S", "W")
+    entry      -- (row, col) cell where the path starts
+    fortytwo   -- cells of the "42" drawing (optional)
+    regenerate -- function with no arguments that returns
+                  (grid, path, fortytwo) for a new maze. If None,
+                  option 1 is not shown.
     '''
     fortytwo = fortytwo or []
     show_path = False
@@ -136,8 +133,10 @@ def display(grid: list[list[int]], path: Sequence[Step],
     message = ""
 
     def prepare(g, p):
+        '''Normalize the path p and walk it over grid g, returning the
+        list of cells it visits (raises ValueError if it is invalid).'''
         steps = normalize_path(p)
-        return walk(g, entry, steps)  # valida e dá as células do caminho
+        return walk(g, entry, steps)
 
     cells = prepare(grid, path)
 

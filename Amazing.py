@@ -1,4 +1,4 @@
-from parsing import load_config, write_output
+from parsing import ConfigError, load_config, write_output
 from mazegen import Mazegenerator
 from display import display
 
@@ -7,21 +7,19 @@ CONFIG_FILE = "config.txt"
 
 
 def generate_maze(config):
+    """Generate a maze from the config, save it to the output file and
+    return (grid, path, fortytwo_cells)."""
     maze = Mazegenerator(
         width=config["WIDTH"],
         height=config["HEIGHT"],
         entry_xy=config["ENTRY"],
         exit_xy=config["EXIT"],
         perfect=config["PERFECT"],
+        seed=config["SEED"],
     )
 
-    # Gera o labirinto
     maze.generate()
 
-    # Procura o caminho entre ENTRY e EXIT
-    maze.solve_maze_bfs()
-
-    # Guarda o labirinto no ficheiro de saída
     write_output(
         config["OUTPUT_FILE"],
         maze.grid,
@@ -34,19 +32,28 @@ def generate_maze(config):
 
 
 def main():
+    """Load the config, generate the maze and show it in the terminal
+    menu. Print an error message if the config or output file fails."""
     try:
         config = load_config(CONFIG_FILE)
-        if config["WIDTH"] < 5 or config["HEIGHT"] < 5:
-            print("Erro: O labirinto é demasiado pequeno para colocar o 42. O tamanho mínimo é 5x5.")
+        if config["WIDTH"] < 2 or config["HEIGHT"] < 2:
+            print("Erro: O labirinto é muito pequeno. O tamanho mínimo é 2x2.")
             return
         grid, path, fortytwo = generate_maze(config)
 
-        # O display trabalha com (row, col),
-        # mas o config usa (x, y).
         entry_display = (
             config["ENTRY"][1],
             config["ENTRY"][0],
         )
+        if config["WIDTH"] < 9 or config["HEIGHT"] < 7:
+            print("\033[91m")
+            print("=" * 55)
+            print("---> AVISO: LABIRINTO MUITO PEQUENO!")
+            print("=" * 55)
+            print(" Não é possível visualizar o número 42.")
+            print(" Para visualizar, utilize um tamanho mínimo de 9x7.")
+            print("=" * 55 + "\n")
+            print("\033[0m")
 
         display(
             grid,
@@ -56,7 +63,7 @@ def main():
             regenerate=lambda: generate_maze(config),
         )
 
-    except (ValueError, OSError) as error:
+    except (ConfigError, ValueError, OSError) as error:
         print(f"Erro: {error}")
 
 

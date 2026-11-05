@@ -316,7 +316,6 @@ Released under the license in `LICENSE.md`.
 - **Planning:**
   - Planned: first a perfect maze generator, then the output file and display,
     then the non-perfect mode, then packaging and documentation.
-    <!-- confirm with Marcela the original plan and dates -->
   - How it evolved: we split the work in layers around a shared grid format
     (one integer per cell, `(row, col)` internally). The non-perfect mode took
     longer than expected: the first braiding left some mazes with fewer than 2
@@ -354,6 +353,8 @@ Released under the license in `LICENSE.md`.
 - [GeeksforGeeks: Python](https://www.geeksforgeeks.org/python/)
 - [Breadth-First Search (BFS) Algorithm (Codecademy)](https://www.codecademy.com/article/breadth-first-search-bfs-algorithm)
 - [Coding Challenge: Maze Generator (Code Train, YouTube)](https://www.youtube.com/watch?v=HyK_Q5rrcr4): DFS maze generation tutorial in JavaScript / p5.js, which we re-implemented in Python.
+- [ANSI Escape Codes (GitHub Gist)](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797): reference for ANSI escape codes used for terminal colors, text formatting, and cursor control.
+- [Console Virtual Terminal Sequences (Microsoft Learn)](https://learn.microsoft.com/pt-br/windows/console/console-virtual-terminal-sequences): documentation on terminal control sequences supported by Windows, including colors, text formatting, and cursor positioning.
 
 
 **How AI was used**
@@ -367,6 +368,9 @@ used it to:
   recursion limits, `Python 3.9` vs `3.10` annotations);
 - discuss the design of the tests (properties of the maze, failure cases,
   reproducibility) and how to structure and build the `mazegen` package;
+- understand and discuss the parsing logic, including how input data is read, validated, and converted into the internal maze representation;
+- understand and discuss the display and visualization logic, including how the maze grid is transformed into a canvas and how walls, floors, paths, entry and exit points are represented;
+- understand and research terminal display concepts and references, including ANSI escape codes, text formatting, terminal colors, and cursor control, and how these can be used to improve the maze visualization in the terminal;
 - structure and co-write this README file
-
+*****---
 The algorithms and the code were written by us.

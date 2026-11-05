@@ -9,7 +9,7 @@ CONFIG_FILE = "config.txt"
 
 def generate_maze(
     config: dict[str, Any],
-) -> tuple[list[list[int]], Sequence[int | str], list[tuple[int, int]]]:
+) -> tuple[list[list[int]], Sequence[int | str], list[tuple[int, int]], int]:
     """Generate a maze from the config, save it to the output file and
     return (grid, path, fortytwo_cells)."""
     maze = Mazegenerator(
@@ -31,7 +31,7 @@ def generate_maze(
         "".join(maze.path),
     )
 
-    return maze.grid, maze.path, maze.fortytwo_cells
+    return maze.grid, maze.path, maze.fortytwo_cells, maze.seed
 
 
 def main() -> None:
@@ -42,7 +42,7 @@ def main() -> None:
         if config["WIDTH"] < 2 or config["HEIGHT"] < 2:
             print("Erro: O labirinto é muito pequeno. O tamanho mínimo é 2x2.")
             return
-        grid, path, fortytwo = generate_maze(config)
+        grid, path, fortytwo, seed = generate_maze(config)
 
         entry_display = (
             config["ENTRY"][1],
@@ -59,15 +59,16 @@ def main() -> None:
             print("\033[0m")
 
         display(
-            grid,
-            path,
+            seed=seed,
+            grid=grid,
+            path=path,
             entry=entry_display,
             fortytwo=fortytwo,
             regenerate=lambda: generate_maze(config),
         )
 
     except (ConfigError, ValueError, OSError) as error:
-        print(f"Erro: {error}")
+        print(f"Error: {error}")
 
 
 if __name__ == "__main__":

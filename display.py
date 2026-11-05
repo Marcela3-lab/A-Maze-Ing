@@ -113,7 +113,7 @@ def clear_screen() -> None:
 Maze = tuple[list[list[int]], Sequence[Step], list[Cell]]
 
 
-def display(grid: list[list[int]], path: Sequence[Step],
+def display(seed: int, grid: list[list[int]], path: Sequence[Step],
             entry: Cell = (0, 0),
             fortytwo: list[Cell] | None = None,
             regenerate: Callable[[], Maze] | None = None) -> None:
@@ -146,7 +146,8 @@ def display(grid: list[list[int]], path: Sequence[Step],
         print(render(canvas, WALL_COLORS[color_idx][1]))
         print()
         print(f"Tamanho: {len(grid[0])}x{len(grid)}  |  "
-              f"Passos: {len(cells) - 1}")
+              f"Passos: {len(cells) - 1} |  "
+              f"Seed: {seed}")
         print("=== A-Maze-ing ===")
         if regenerate is not None:
             print("1. Gerar um novo labirinto")
@@ -165,7 +166,7 @@ def display(grid: list[list[int]], path: Sequence[Step],
             break
 
         if choice == "1" and regenerate is not None:
-            grid, path, fortytwo = regenerate()
+            grid, path, fortytwo, seed = regenerate()
             cells = prepare(grid, path)
         elif choice == "2":
             show_path = not show_path

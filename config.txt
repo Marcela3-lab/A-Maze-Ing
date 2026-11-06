@@ -1,6 +1,11 @@
 WIDTH=15
+WIDTH=15
 HEIGHT=15
 ENTRY=0,0
 EXIT=14,14
 OUTPUT_FILE=maze.txt
 PERFECT=False
+
+#aceita dua variaveis iguais
+#rejeitar / no nome para nao dar erro traceback padrao do python
+#make fclean apaga o maze.txt

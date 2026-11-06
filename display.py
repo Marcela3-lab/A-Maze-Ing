@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from __future__ import annotations
 
-from typing import Callable, Sequence, Union
+from typing import Callable, Sequence, Union, Any
 
 NORTH, EAST, SOUTH, WEST = 1, 2, 4, 8
 
@@ -110,13 +110,13 @@ def clear_screen() -> None:
     print("\033[2J\033[H", end="")
 
 
-Maze = tuple[list[list[int]], Sequence[Step], list[Cell]]
+Maze = tuple[list[list[int]], Sequence[Step], list[Cell]], int
 
 
 def display(seed: int, grid: list[list[int]], path: Sequence[Step],
             entry: Cell = (0, 0),
             fortytwo: list[Cell] | None = None,
-            regenerate: Callable[[], Maze] | None = None) -> None:
+            regenerate: Callable[[], Any] | None = None) -> None:
     '''Show the maze in the terminal with a menu.
 
     grid       -- list of lists of integers 0-15 (grid[row][col])
@@ -143,6 +143,7 @@ def display(seed: int, grid: list[list[int]], path: Sequence[Step],
     while True:
         clear_screen()
         canvas = build_canvas(grid, cells, fortytwo, show_path)
+        print()
         print(render(canvas, WALL_COLORS[color_idx][1]))
         print()
         print(f"Tamanho: {len(grid[0])}x{len(grid)}  |  "

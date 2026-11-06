@@ -57,7 +57,12 @@ def main() -> None:
             print(" Para visualizar, utilize um tamanho mínimo de 9x7.")
             print("=" * 55 + "\n")
             print("\033[0m")
-
+        if CONFIG_FILE == "config.txt":
+            print("\033[91m")
+            print("=" * 55)
+            print(f"---> AVISO: ficheiro padrão - {CONFIG_FILE}!")
+            print("=" * 55 + "\n")
+            print("\033[0m")
         display(
             seed=seed,
             grid=grid,

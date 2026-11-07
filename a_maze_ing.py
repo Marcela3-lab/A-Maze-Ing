@@ -1,5 +1,6 @@
 from typing import Any, Sequence
-
+import sys
+import os
 from parsing import ConfigError, load_config, write_output
 from mazegen import Mazegenerator
 from display import display
@@ -48,6 +49,16 @@ def main() -> None:
             config["ENTRY"][1],
             config["ENTRY"][0],
         )
+        ficheiro = sys.argv[1]
+        extensao = os.path.splitext(ficheiro)
+        if len(sys.argv) > 2 or extensao[1] != ".txt":
+            print("\033[91m")
+            print("=" * 80)
+            print("---> AVISO: Só é possivel passar dois "
+                  "argumentos e o segundo deve ser um .txt")
+            print("=" * 80 + "\n")
+            print("\033[0m")
+            return
         if config["WIDTH"] < 9 or config["HEIGHT"] < 7:
             print("\033[91m")
             print("=" * 55)
@@ -57,7 +68,7 @@ def main() -> None:
             print(" Para visualizar, utilize um tamanho mínimo de 9x7.")
             print("=" * 55 + "\n")
             print("\033[0m")
-        if CONFIG_FILE == "config.txt":
+        if sys.argv[1]:
             print("\033[91m")
             print("=" * 55)
             print(f"---> AVISO: ficheiro padrão - {CONFIG_FILE}!")

@@ -15,13 +15,17 @@ def read_config_file(path: str) -> dict[str, str]:
     except FileNotFoundError:
         raise ConfigError(f"file '{path}' not found")
     raw: dict[str, str] = {}
-    for line in lines:
+    for i, line in enumerate(lines, start=1):
         line = line.strip()
         if line.startswith("#") or not line:
             continue
         if "=" not in line:
             raise ConfigError(f"line without '=': '{line}'")
         key, value = line.split("=", 1)
+        if key.strip() in raw:
+            print("a")
+            raise ConfigError(f"duplicate parameter "
+                              f"'{key.strip()}' on line {i}")
         raw[key.strip()] = value.strip()
     return raw
 
@@ -75,7 +79,10 @@ def validate_config(raw: dict[str, str]) -> dict[str, Any]:
             missing.append(k)
     if missing:
         raise ConfigError(f"keys missing {(', '.join(missing))}")
+
     for key, value in raw.items():
+        if key in config:
+            raise ValueError("cannot be repeted")
         if key == "WIDTH":
             config[key] = parse_int(key, value)
         elif key == "HEIGHT":

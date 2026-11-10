@@ -49,8 +49,10 @@ def main() -> None:
             config["ENTRY"][1],
             config["ENTRY"][0],
         )
-        ficheiro = sys.argv[1]
-        extensao = os.path.splitext(ficheiro)
+        extensao = ("", ".txt")
+        if len(sys.argv) > 1:
+            ficheiro = sys.argv[1]
+            extensao = os.path.splitext(ficheiro)
         if len(sys.argv) > 2 or extensao[1] != ".txt":
             print("\033[91m")
             print("=" * 80)
@@ -68,7 +70,7 @@ def main() -> None:
             print(" Para visualizar, utilize um tamanho mínimo de 9x7.")
             print("=" * 55 + "\n")
             print("\033[0m")
-        if sys.argv[1]:
+        if len(sys.argv) == 1:
             print("\033[91m")
             print("=" * 55)
             print(f"---> AVISO: ficheiro padrão - {CONFIG_FILE}!")

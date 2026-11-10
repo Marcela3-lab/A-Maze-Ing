@@ -23,7 +23,6 @@ def read_config_file(path: str) -> dict[str, str]:
             raise ConfigError(f"line without '=': '{line}'")
         key, value = line.split("=", 1)
         if key.strip() in raw:
-            print("a")
             raise ConfigError(f"duplicate parameter "
                               f"'{key.strip()}' on line {i}")
         raw[key.strip()] = value.strip()
